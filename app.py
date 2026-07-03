@@ -14,7 +14,7 @@ from pulp import (
 # ------------------------------------------------------------
 st.set_page_config(page_title="X,Y Optimisation Calculator", layout="wide")
 
-# CSS to fix contrast, force readable colors, enlarge text, and fix text alignment
+# CSS to fix contrast, force readable colors, enlarge text safely
 st.markdown("""
     <style>
     /* GLOBAL OVERRIDES */
@@ -46,14 +46,11 @@ st.markdown("""
         color: #111827 !important;
     }
 
-    /* STYLE, ENLARGE, AND ALIGN ALL INPUT FIELDS */
+    /* STYLE AND ENLARGE ALL INPUT FIELDS SAFELY */
     div[data-baseweb="input"] input, div[data-baseweb="number-input"] input {
-        font-size: 1.6rem !important;
+        font-size: 1.5rem !important;
         font-weight: 700 !important;
-        height: 3.5rem !important;
-        line-height: 3.5rem !important; /* Vertically centers the text */
-        padding-top: 0 !important;      /* Overrides Streamlit's default padding */
-        padding-bottom: 0 !important;   /* Overrides Streamlit's default padding */
+        padding: 0.75rem 0.5rem !important; /* Safe padding instead of forced heights */
         border-radius: 8px !important;
     }
 
@@ -66,7 +63,6 @@ st.markdown("""
         box-shadow: 0px 8px 15px rgba(0,0,0,0.15) !important;
         transition: all 0.3s ease 0s !important;
     }
-    /* Target the text inside the button specifically */
     div.stButton > button:first-child p {
         font-size: 2rem !important;
         font-weight: 800 !important;
@@ -162,23 +158,21 @@ if solve_btn:
         opt_y = value(y) if value(y) is not None else 0.0
         opt_z = value(model.objective) if value(model.objective) is not None else 0.0
         
+        # HTML un-indented so Markdown doesn't parse it as a code block
         lcd_html = f"""
-        <div style="background-color: #1a1c23; border: 8px solid #2e3440; border-radius: 15px; padding: 40px; text-align: center; box-shadow: inset 0px 0px 25px rgba(0,0,0,0.8); margin-top: 10px;">
-            <p style="font-size: 1.5rem; color: #8892b0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 3px; font-family: 'Segoe UI', sans-serif; font-weight: 600;">Calculated {obj_label}</p>
-            
-            <div style="font-size: 6rem; color: #10b981; margin: 0; font-family: 'Courier New', Courier, monospace; font-weight: 900; text-shadow: 0px 0px 20px rgba(16, 185, 129, 0.5); line-height: 1.1;">
-                £{opt_z:,.2f}
-            </div>
-            
-            <hr style="border-color: #3b4252; margin: 35px 0;">
-            
-            <p style="font-size: 2rem; color: #eceff4; margin: 0; font-weight: 400; font-family: 'Segoe UI', sans-serif;">
-                <span style="color: #10b981; font-weight: bold;">{opt_x:,.2f}</span> {x_label} 
-                <span style="color: #4c566a; margin: 0 25px;">|</span> 
-                <span style="color: #10b981; font-weight: bold;">{opt_y:,.2f}</span> {y_label}
-            </p>
-        </div>
-        """
+<div style="background-color: #1a1c23; border: 8px solid #2e3440; border-radius: 15px; padding: 40px; text-align: center; box-shadow: inset 0px 0px 25px rgba(0,0,0,0.8); margin-top: 10px;">
+    <p style="font-size: 1.5rem; color: #8892b0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 3px; font-family: 'Segoe UI', sans-serif; font-weight: 600;">Calculated {obj_label}</p>
+    <div style="font-size: 6rem; color: #10b981; margin: 0; font-family: 'Courier New', Courier, monospace; font-weight: 900; text-shadow: 0px 0px 20px rgba(16, 185, 129, 0.5); line-height: 1.1;">
+        £{opt_z:,.2f}
+    </div>
+    <hr style="border-color: #3b4252; margin: 35px 0;">
+    <p style="font-size: 2rem; color: #eceff4; margin: 0; font-weight: 400; font-family: 'Segoe UI', sans-serif;">
+        <span style="color: #10b981; font-weight: bold;">{opt_x:,.2f}</span> {x_label} 
+        <span style="color: #4c566a; margin: 0 25px;">|</span> 
+        <span style="color: #10b981; font-weight: bold;">{opt_y:,.2f}</span> {y_label}
+    </p>
+</div>
+"""
         st.markdown(lcd_html, unsafe_allow_html=True)
             
     else:
