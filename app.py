@@ -17,7 +17,7 @@ st.title("🧮 X, Y Optimisation Calculator")
 st.caption("A streamlined linear programming solver using PuLP")
 
 # ------------------------------------------------------------
-# COMPACT UI LAYOUT (FITS ON ONE SCREEN)
+# COMPACT UI LAYOUT
 # ------------------------------------------------------------
 col_obj, col_cons = st.columns(2, gap="large")
 
@@ -60,7 +60,7 @@ with col_cons:
         
         constraints.append((c_label, ax, ay, rhs))
 
-st.write("") # Small spacer
+st.write("") 
 solve_btn = st.button("Calculate Optimum", type="primary", use_container_width=True)
 st.divider()
 
@@ -88,26 +88,8 @@ if solve_btn:
         opt_y = value(y) if value(y) is not None else 0.0
         opt_z = value(model.objective) if value(model.objective) is not None else 0.0
         
-        out_model, out_results = st.columns(2, gap="large")
-        
-        with out_model:
-            st.subheader("Model Formulation")
-            operator = "Maximise" if maximise else "Minimise"
-            
-            # Formatted model text
-            st.markdown(f"**{operator} {obj_label}** = {cx} × **{x_label}** + {cy} × **{y_label}**")
-            st.markdown("**Subject to:**")
-            for label, ax, ay, rhs in constraints:
-                st.markdown(f"* {label}: {ax} × **{x_label}** + {ay} × **{y_label}** ≤ {rhs}")
-                
-        with out_results:
-            st.subheader("Optimal Solution")
-            st.success(f"Solver Status: {status}")
-            
-            # Bolded variables and objective function
-            st.markdown(f"Optimal **{x_label}**: **{opt_x:,.2f}**")
-            st.markdown(f"Optimal **{y_label}**: **{opt_y:,.2f}**")
-            st.markdown(f"Calculated **{obj_label}**: **{opt_z:,.2f}**")
+        # Clean, single-line output
+        st.success(f"**Decision Variables:** {opt_x:,.2f} {x_label}, {opt_y:,.2f} {y_label} results in **£{opt_z:,.2f}** {obj_label.lower()}")
             
     else:
         st.error(f"Solver Status: {status}. Please check your constraints to ensure a feasible region exists.")
