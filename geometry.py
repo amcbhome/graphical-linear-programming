@@ -1,62 +1,83 @@
 """
-geometry.py
+plotter.py
 
-Computes feasible region polygon for LPModel
+Visualises LPModel solution + geometry
 """
 
 import numpy as np
-from shapely.geometry import Polygon, box
+import plotly.graph_objects as go
 
 
-def build_geometry(model, x_hint=50, y_hint=50):
+def build_plot(geometry, solution, model):
 
-    region = box(0, 0, x_hint, y_hint)
+    fig = go.Figure()
 
-    points = []
+    x_max, y_max = geometry["limits"]
 
-    grid = np.linspace(0, x_hint, 40)
+    x_range = np.linspace(0, x_max, 300)
 
-    for x in grid:
-        for y in grid:
-            if _feasible(x, y, model):
-                points.append((x, y))
+    # ---------------------------
+    # constraints
+    # ---------------------------
 
-    if len(points) < 3:
-        return {"vertices": [], "limits": (x_hint, y_hint)}
+    for i, c in enumerate(model.constraints):
 
-    poly = Polygon(points).convex_hull
-    region = region.intersection(poly)
+        if c.ay != 0:
+            y = (c.rhs - c.ax * x_range) / c.ay
+            fig.add_trace(go.Scatter(
+                x=x_range,
+                y=y,
+                mode="lines",
+                name=f"C{i+1}"
+            ))
 
-    vertices = []
+    # ---------------------------
+    # feasible region
+    # ---------------------------
 
-    if not region.is_empty and region.geom_type == "Polygon":
-        coords = list(region.exterior.coords)
-        vertices = [(float(x), float(y)) for x, y in coords[:-1]]
+    v = geometry["vertices"]
 
-    if vertices:
-        xs = [v[0] for v in vertices]
-        ys = [v[1] for v in vertices]
-        limits = (max(xs) * 1.1, max(ys) * 1.1)
-    else:
-        limits = (x_hint, y_hint)
+    if v:
+        vx = [p[0] for p in v] + [v[0][0]]
+        vy = [p[1] for p in v] + [v[0][1]]
 
-    return {
-        "vertices": vertices,
-        "limits": limits,
-    }
+        fig.add_trace(go.Scatter(
+            x=vx,
+            y=vy,
+            fill="toself",
+            fillcolor="rgba(0,150,255,0.25)",
+            name="Feasible Region"
+        ))
 
+        fig.add_trace(go.Scatter(
+            x=[p[0] for p in v],
+            y=[p[1] for p in v],
+            mode="markers",
+            name="Vertices"
+        ))
 
-def _feasible(x, y, model):
+    # ---------------------------
+    # optimum
+    # ---------------------------
 
-    for c in model.constraints:
+    fig.add_trace(go.Scatter(
+        x=[solution["x"]],
+        y=[solution["y"]],
+        mode="markers+text",
+        marker=dict(size=12, color="red"),
+        text=["OPT"],
+        name="Optimal"
+    ))
 
-        val = c.ax * x + c.ay * y
+    # ---------------------------
+    # layout
+    # ---------------------------
 
-        if c.relation == "<=" and val > c.rhs + 1e-6:
-            return False
-        if c.relation == ">=" and val < c.rhs - 1e-6:
-            return False
-        if c.relation == "=" and abs(val - c.rhs) > 1e-6:
-            return False
+    fig.update_layout(
+        title="X,Y Optimisation Model",
+        template="simple_white",
+        width=900,
+        height=650
+    )
 
-    return True
+    return fig
