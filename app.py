@@ -8,7 +8,8 @@ from pulp import (
     value,
     PULP_CBC_CMD,
 )
-from pylatex import Document, Math, Alignat, NoEscape
+# Removed "Math" from the imports
+from pylatex import Document, Alignat, NoEscape
 
 # ------------------------------------------------------------
 # PAGE CONFIG & CALCULATOR CSS
@@ -65,7 +66,6 @@ st.markdown("""
 with st.sidebar:
     st.image("https://img.icons8.com/plasticine/200/calculator.png", width=120)
     st.divider()
-    # Create an empty container in the sidebar to inject the download button later
     sidebar_report_container = st.container()
 
 st.title("🧮 X, Y Optimisation Calculator")
@@ -85,14 +85,14 @@ def generate_latex_source(cx, cy, maximise, constraints, obj_label, x_label, y_l
     opt_word = "Maximize" if maximise else "Minimize"
     doc.append(f"{opt_word} {obj_label}:")
     
-    with doc.create(Math(display=True)):
-        doc.append(NoEscape(f"Z = {cx}x + {cy}y"))
+    # FIX: Use raw string display math instead of the Math object
+    doc.append(NoEscape(f"\\[ Z = {cx}x + {cy}y \\]"))
         
     doc.append("Subject to:")
     with doc.create(Alignat(numbering=False, escape=False)) as agn:
         for label, ax, ay, rhs in constraints:
             agn.append(f"{ax}x + {ay}y &\\leq {rhs} \\quad \\text{{({label})}} \\\\")
-        agn.append(r"x, y &\geq 0 \\") # Standard non-negativity constraint
+        agn.append(r"x, y &\geq 0 \\") 
         
     # 2. Optimal Solution
     doc.append(NoEscape(r'\subsection*{2. Optimal Solution}'))
@@ -105,7 +105,6 @@ def generate_latex_source(cx, cy, maximise, constraints, obj_label, x_label, y_l
     else:
         doc.append(f"No optimal solution found. Solver status: {sol['status']}")
 
-    # Return the raw string of the LaTeX document
     return doc.dumps()
 
 # ------------------------------------------------------------
