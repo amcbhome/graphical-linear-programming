@@ -37,10 +37,10 @@ st.markdown("""
     /* RADIO BUTTONS */
     div[data-testid="stRadio"] label p { color: #f0f0f0 !important; font-size: 1.1rem !important; font-weight: 600 !important;}
 
-    /* INPUT FIELDS - Styled like the dark grey keys */
+    /* INPUT FIELDS - Black background with green text */
     div[data-baseweb="input"] input, div[data-baseweb="number-input"] input {
-        background-color: #3b3e4e !important;
-        color: #ffffff !important;
+        background-color: #0a0a0c !important; /* Deep black */
+        color: #10b981 !important; /* Vibrant green matching the output */
         font-size: 1.4rem !important;
         font-weight: 700 !important;
         padding: 0.5rem 0.5rem !important; 
@@ -48,27 +48,27 @@ st.markdown("""
         border: 1px solid #2e313e !important;
     }
 
-    /* THE CALCULATE BUTTON - Styled like the orange operator keys */
+    /* THE CALCULATE BUTTON - Flat, matte finish */
     div.stButton > button:first-child {
         background-color: #f49020 !important;
         color: #ffffff !important;
         height: 3.5em !important;
         border-radius: 12px !important;
         border: none !important;
-        box-shadow: 0 4px 10px rgba(244, 144, 32, 0.3) !important;
-        transition: all 0.3s ease 0s !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+        transition: all 0.2s ease-in-out !important;
         margin-top: 0.5rem !important;
     }
     div.stButton > button:first-child p {
-        font-size: 1.6rem !important;
+        font-size: 1.4rem !important; 
         font-weight: 800 !important;
         text-transform: uppercase;
-        letter-spacing: 2px !important;
+        letter-spacing: 1px !important;
         margin: 0 !important;
     }
     div.stButton > button:first-child:hover {
-        background-color: #ff9d33 !important;
-        transform: translateY(-2px) !important;
+        background-color: #e38217 !important; 
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -130,7 +130,7 @@ with col_cons:
         
         constraints.append((c_label, ax, ay, rhs))
 
-solve_btn = st.button("Calculate X and Y", type="primary", use_container_width=True)
+solve_btn = st.button("Calculate Decision Variables", type="primary", use_container_width=True)
 
 # ------------------------------------------------------------
 # SOLVER & DIGITAL LCD OUTPUT
