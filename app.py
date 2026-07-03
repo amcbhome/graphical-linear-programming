@@ -10,11 +10,11 @@ from pulp import (
 )
 
 # ------------------------------------------------------------
-# PAGE CONFIG & ENHANCED CALCULATOR CSS
+# PAGE CONFIG & CALCULATOR CSS
 # ------------------------------------------------------------
 st.set_page_config(page_title="X,Y Optimisation Calculator", layout="wide")
 
-# CSS to fix contrast, enlarge text safely, and COMPACT layout to prevent scrolling
+# CSS to mimic the classic dark-mode calculator theme and compact the layout
 st.markdown("""
     <style>
     /* COMPACT STREAMLIT WHITESPACE */
@@ -23,52 +23,52 @@ st.markdown("""
         padding-bottom: 1rem !important;
     }
     
-    /* GLOBAL OVERRIDES */
+    /* GLOBAL OVERRIDES - Dark Theme Background */
     html, body, [data-testid="stAppViewContainer"] {
-        background-color: #f4f6f9 !important;
+        background-color: #22242c !important; 
     }
     
-    /* COMPACT HEADERS */
-    h1 { font-size: 3rem !important; font-weight: 800 !important; color: #111827 !important; margin-bottom: 0 !important;}
-    p.stCaption { font-size: 1.1rem !important; font-weight: 500 !important; color: #64748b !important; margin-bottom: 1rem !important; }
-    h3 { font-size: 1.8rem !important; font-weight: 700 !important; color: #1f2937 !important; margin-top: 0.5rem !important;}
+    /* TEXT COLORS FOR DARK THEME */
+    h1, h3 { color: #f0f0f0 !important; margin-bottom: 0 !important; margin-top: 0.5rem !important;}
+    p.stCaption { color: #8a8d9e !important; font-size: 1.1rem !important; margin-bottom: 1rem !important; }
+    label[data-testid="stWidgetLabel"] p { color: #b0b3c5 !important; font-size: 1rem !important; font-weight: 600 !important; }
+    div[data-testid="stCaptionContainer"] p { color: #8a8d9e !important; font-size: 0.9rem !important; font-weight: 700 !important; }
 
-    /* FIX STANDARD LABELS & CAPTIONS FOR READABILITY */
-    label[data-testid="stWidgetLabel"] p { font-size: 1rem !important; font-weight: 600 !important; color: #334155 !important; }
-    div[data-testid="stCaptionContainer"] p { color: #475569 !important; font-size: 0.9rem !important; font-weight: 700 !important; }
+    /* RADIO BUTTONS */
+    div[data-testid="stRadio"] label p { color: #f0f0f0 !important; font-size: 1.1rem !important; font-weight: 600 !important;}
 
-    /* ENLARGE RADIO BUTTONS */
-    div[data-testid="stRadio"] label p { font-size: 1.1rem !important; font-weight: 600 !important; color: #111827 !important; }
-
-    /* STYLE AND ENLARGE ALL INPUT FIELDS SAFELY */
+    /* INPUT FIELDS - Styled like the dark grey keys */
     div[data-baseweb="input"] input, div[data-baseweb="number-input"] input {
+        background-color: #3b3e4e !important;
+        color: #ffffff !important;
         font-size: 1.4rem !important;
         font-weight: 700 !important;
         padding: 0.5rem 0.5rem !important; 
-        border-radius: 8px !important;
+        border-radius: 12px !important;
+        border: 1px solid #2e313e !important;
     }
 
-    /* HIGHLY APPEALING GRADIENT CALCULATE BUTTON */
+    /* THE CALCULATE BUTTON - Styled like the orange operator keys */
     div.stButton > button:first-child {
-        background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%) !important;
+        background-color: #f49020 !important;
+        color: #ffffff !important;
         height: 3.5em !important;
-        border-radius: 10px !important;
-        box-shadow: 0 6px 15px rgba(255, 75, 43, 0.3) !important;
+        border-radius: 12px !important;
         border: none !important;
+        box-shadow: 0 4px 10px rgba(244, 144, 32, 0.3) !important;
         transition: all 0.3s ease 0s !important;
         margin-top: 0.5rem !important;
     }
     div.stButton > button:first-child p {
         font-size: 1.6rem !important;
         font-weight: 800 !important;
-        color: #ffffff !important;
         text-transform: uppercase;
         letter-spacing: 2px !important;
         margin: 0 !important;
     }
     div.stButton > button:first-child:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 10px 20px rgba(255, 75, 43, 0.5) !important;
+        background-color: #ff9d33 !important;
+        transform: translateY(-2px) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -121,9 +121,8 @@ with col_cons:
         
         default_ax = 4.0 if i == 0 else 3.0
         default_ay = 4.0 if i == 0 else 5.0
-        
-        # Using integers (16000 instead of 16000.0) removes the decimals from the RHS inputs
-        default_rhs = 16000 if i == 0 else 15000
+        # Whole numbers keep the RHS clean
+        default_rhs = 16000 if i == 0 else 15000 
         
         ax = r2.number_input("X Coeff", value=default_ax, key=f"ax_{i}", step=0.5, label_visibility="collapsed")
         ay = r3.number_input("Y Coeff", value=default_ay, key=f"ay_{i}", step=0.5, label_visibility="collapsed")
@@ -131,11 +130,10 @@ with col_cons:
         
         constraints.append((c_label, ax, ay, rhs))
 
-# Changed button text to be more appealing and instructional
-solve_btn = st.button("✨ Calculate X and Y ✨", type="primary", use_container_width=True)
+solve_btn = st.button("Calculate X and Y", type="primary", use_container_width=True)
 
 # ------------------------------------------------------------
-# SOLVER & MASSIVE DIGITAL OUTPUT
+# SOLVER & DIGITAL LCD OUTPUT
 # ------------------------------------------------------------
 if solve_btn:
     sense = LpMaximize if maximise else LpMinimize
@@ -157,19 +155,18 @@ if solve_btn:
         opt_y = value(y) if value(y) is not None else 0.0
         opt_z = value(model.objective) if value(model.objective) is not None else 0.0
         
-        # HTML is un-indented and padding reduced to prevent scrolling
-        # Objective value formatting updated to {opt_z:,.0f} to omit decimals
+        # HTML un-indented so Markdown doesn't parse it as a code block
         lcd_html = f"""
-<div style="background-color: #1a1c23; border: 8px solid #2e3440; border-radius: 12px; padding: 20px; text-align: center; box-shadow: inset 0px 0px 20px rgba(0,0,0,0.8); margin-top: 10px;">
-    <p style="font-size: 1.2rem; color: #8892b0; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 3px; font-family: 'Segoe UI', sans-serif; font-weight: 600;">Calculated {obj_label}</p>
-    <div style="font-size: 5.5rem; color: #10b981; margin: 0; font-family: 'Courier New', Courier, monospace; font-weight: 900; text-shadow: 0px 0px 15px rgba(16, 185, 129, 0.5); line-height: 1.1;">
+<div style="background-color: #3a4372; border-radius: 15px; padding: 20px; text-align: center; box-shadow: inset 0px 4px 10px rgba(0,0,0,0.3); margin-top: 10px;">
+    <p style="font-size: 1.2rem; color: #a4adcf; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 3px; font-weight: 600;">Calculated {obj_label}</p>
+    <div style="font-size: 5.5rem; color: #ffffff; margin: 0; font-family: 'Courier New', Courier, monospace; font-weight: 900; line-height: 1.1;">
         £{opt_z:,.0f}
     </div>
-    <hr style="border-color: #3b4252; margin: 20px 0;">
-    <p style="font-size: 1.8rem; color: #eceff4; margin: 0; font-weight: 400; font-family: 'Segoe UI', sans-serif;">
-        <span style="color: #10b981; font-weight: bold;">{opt_x:,.2f}</span> {x_label} 
-        <span style="color: #4c566a; margin: 0 20px;">|</span> 
-        <span style="color: #10b981; font-weight: bold;">{opt_y:,.2f}</span> {y_label}
+    <hr style="border-color: #555f94; margin: 20px 0;">
+    <p style="font-size: 1.8rem; color: #e0e4f5; margin: 0; font-weight: 400;">
+        <span style="font-weight: bold;">{opt_x:,.2f}</span> {x_label} 
+        <span style="color: #8a94c4; margin: 0 20px;">|</span> 
+        <span style="font-weight: bold;">{opt_y:,.2f}</span> {y_label}
     </p>
 </div>
 """
